@@ -1,0 +1,16 @@
+---
+title: "cancer project"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("~/Desktop/Courses/W203 - Stat for Data Science/Lab_1/MIDS_LAB01")
+getwd()
+
+data = read.csv("cancer.csv")
+summary(data)
+```
