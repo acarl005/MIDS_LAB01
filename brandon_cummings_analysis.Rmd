@@ -6,36 +6,118 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F)
 ```
-### Research Question: Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
+# Introduction
+
+Research Question: Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
 
 ```{r}
 setwd("~/Desktop/Courses/W203 - Stat for Data Science/Lab_1/MIDS_LAB01")
 data = read.csv("cancer.csv")
 ```
 
-### Number of Variables
-```{r}
-length(colnames(data))
-```
-### Number of Observations
-```{r}
-nrow(data)
-```
+Number of Variables: `r length(colnames(data))`  
+Number of Observations: `r nrow(data)`  
 
-##3 Variable names
+### Variables: 
+This dataset contains variables describing county, region, population, birthrate, race, marital status, insurance coverage, income status, and education.
 ```{r}
 colnames(data)
 ```
 
-# Variable clarification
+## Variable clarification and assumption
 PctPrivateCoverage: "Percentage of the population with private insurance coverage"  
        avgAnnCount: "2009-2013 mean incidences per county"  
     povertyPercent: "Percent of population below poverty line"  
         popEst2015: "Estimated population by county 2015"  
  PctPublicCoverage: "Percentage of the population with public insurance coverage"  
+         deathRate: "Number of deaths attributed to cancer"  
+         binnedInc: "Income groups????"  
 
-# Excluded variables
-### Example Var
+## Data Quality
+1) The sample size seems to be large enough to get valuable insight.
+2) The data seems to be collected in different number formats, even for the same columns. Some have integers, some have floats with one decimal, others many decimals.
+3) Seems to be a number of obeservations that are NA of 18-24 with some college, `r sum(is.na(data$PctSomeCol18_24))` to be exact.
+
+# Univariate Analysis of Key Variables
+
+The key variables that we focused on are in groups related to the variable deathRate:
+
+### Population: popEst2015, AvgHouseholdSize, PercentMarried, Geography, avgAnnCount, BirthRate, binnedInc
+
 ```{r}
-
+plot(data$deathRate[!is.na(data$deathRate)] ~ data$popEst2015[!is.na(data$popEst2015)])
+plot(data$deathRate ~ data$AvgHouseholdSize[!is.na(data$AvgHouseholdSize)])
+plot(data$deathRate ~ data$PercentMarried[!is.na(data$PercentMarried)])
+plot(data$deathRate ~ data$Geography[!is.na(data$Geography)])
+plot(data$deathRate ~ data$avgAnnCount[!is.na(data$avgAnnCount)])
+plot(data$deathRate ~ data$BirthRate[!is.na(data$BirthRate)])
+#plot(data$deathRate ~ data$binnedInc[!is.na(data$binnedInc)])
 ```
+
+### Age: MedianAge, MedianAgeMale, MedianAgeFemale
+
+```{r}
+plot(data$deathRate ~ data$MedianAge)
+plot(data$deathRate ~ data$MedianAgeMale)
+plot(data$deathRate ~ data$MedianAgeFemale)
+```
+
+### Income: medIncome, povertyPercent, binnedInc, PctEmployed16_Over, PctUnemployed16_Over
+
+```{r}
+plot(data$deathRate ~ data$medIncome)
+plot(data$deathRate ~ data$povertyPercent)
+plot(data$deathRate ~ data$binnedInc)
+plot(data$deathRate ~ data$PctEmployed16_Over)
+plot(data$deathRate ~ data$PctUnemployed16_Over)
+```
+
+### Race: PctWhite, PctBlack, PctAsian, PctOtherRace
+
+```{r}
+plot(data$deathRate ~ data$PctWhite)
+plot(data$deathRate ~ data$PctBlack)
+plot(data$deathRate ~ data$PctAsian)
+plot(data$deathRate ~ data$PctOtherRace)
+```
+
+### Education: PctNoHS18_24, PctHS18_24, PctHS25_Over, PctSomeCol18_24, PctBachDeg18_24, PctBachDeg25_Over
+
+```{r}
+plot(data$deathRate ~ data$PctNoHS18_24)
+plot(data$deathRate ~ data$PctHS18_24)
+plot(data$deathRate ~ data$PctHS25_Over)
+plot(data$deathRate ~ data$PctSomeCol18_24)
+plot(data$deathRate ~ data$PctBachDeg18_24)
+plot(data$deathRate ~ data$PctBachDeg25_Over)
+```
+
+### Insurance Coverage: PctPrivateCoverage, PctEmpPrivCoverage, PctPublicCoverage
+
+```{r}
+plot(data$deathRate ~ data$PctPrivateCoverage)
+plot(data$deathRate ~ data$PctEmpPrivCoverage)
+plot(data$deathRate ~ data$PctPublicCoverage)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
