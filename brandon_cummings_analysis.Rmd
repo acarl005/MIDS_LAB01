@@ -1,16 +1,41 @@
 ---
-title: "cancer project"
+title: "Cancer EDA"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = F)
 ```
+### Research Question: Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
 
 ```{r}
 setwd("~/Desktop/Courses/W203 - Stat for Data Science/Lab_1/MIDS_LAB01")
-getwd()
-
 data = read.csv("cancer.csv")
-summary(data)
+```
+
+### Number of Variables
+```{r}
+length(colnames(data))
+```
+### Number of Observations
+```{r}
+nrow(data)
+```
+
+##3 Variable names
+```{r}
+colnames(data)
+```
+
+# Variable clarification
+PctPrivateCoverage: "Percentage of the population with private insurance coverage"  
+       avgAnnCount: "2009-2013 mean incidences per county"  
+    povertyPercent: "Percent of population below poverty line"  
+        popEst2015: "Estimated population by county 2015"  
+ PctPublicCoverage: "Percentage of the population with public insurance coverage"  
+
+# Excluded variables
+### Example Var
+```{r}
+
 ```
