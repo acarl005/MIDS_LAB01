@@ -45,13 +45,13 @@ The key variables that we focused on are in groups related to the variable death
 ### Population: popEst2015, AvgHouseholdSize, PercentMarried, Geography, avgAnnCount, BirthRate, binnedInc
 
 ```{r}
-plot(data$deathRate[!is.na(data$deathRate)] ~ data$popEst2015[!is.na(data$popEst2015)])
-plot(data$deathRate ~ data$AvgHouseholdSize[!is.na(data$AvgHouseholdSize)])
-plot(data$deathRate ~ data$PercentMarried[!is.na(data$PercentMarried)])
-plot(data$deathRate ~ data$Geography[!is.na(data$Geography)])
-plot(data$deathRate ~ data$avgAnnCount[!is.na(data$avgAnnCount)])
-plot(data$deathRate ~ data$BirthRate[!is.na(data$BirthRate)])
-#plot(data$deathRate ~ data$binnedInc[!is.na(data$binnedInc)])
+plot(data$deathRate ~ data$popEst2015)
+plot(data$deathRate ~ data$AvgHouseholdSize)
+plot(data$deathRate ~ data$PercentMarried)
+# have trouble with plot(data$deathRate ~ data$Geography), you can convert to utf-8  <- iconv(data$Geography, to='UTF-8', sub='')
+plot(data$deathRate ~ data$avgAnnCount)
+plot(data$deathRate ~ data$BirthRate)
+plot(data$deathRate ~ data$binnedInc)
 ```
 
 ### Age: MedianAge, MedianAgeMale, MedianAgeFemale
