@@ -17,7 +17,7 @@ The labels of some of the variables are listed below; the rest of the variables 
 
 ```{r}
 # Load CSV data
-(cancer = read.csv("MIDS_LAB01/cancer.csv"))
+cancer = read.csv("cancer.csv")
 ```
 
 ## Introduction
@@ -39,10 +39,60 @@ length(cancer)
 
 ```{r}
 # Show how many observations there are in each variable
-lapply(cancer, function(df) {
+for(df in cancer) {
   cat(sprintf("Dataframe length: %d\n", length(df)))
-  NULL
-})
+}
+```
+
+## Univariate Analysis of Key Variables
+
+```{r}
+# Create a working copy of the variable cancer
+canc <- cancer
+
+# Summary
+summary(canc$deathRate)
+
+# Histogram
+hist(canc$deathRate, breaks = 20, main = "Death Rate", xlab = NULL)
+```
+
+```{r}
+# Define a function for running a set of compareative methods such as cor(), scattered plot, etc
+compare_with_deathRate <- function(c, df, count) {
+  if(is.na(colnames(c)[count])) {
+    ylabel =  NULL
+  } else {
+    ylabel = colnames(c)[count]
+  }
+
+  # DEBUG  
+  #cat(sprintf("Dataframe name: %s\n", colnames(c)[df]))
+  
+  # Correlation
+  cat(sprintf("Correlation - Death Rate and %s: %f\n", ylabel, cor(c$deathRate, df)))
+  
+  # Scatter Plot
+  plot(jitter(c$deathRate, factor=2), jitter(df, factor=2),  
+       xlab = "Death Rate", ylab = ylabel, 
+       main = "Correlation with Death Rate")
+  abline(lm(c$deathRate ~ df))
+}
+
+# Loop over all numeric variables in canc and analyze
+count <- 1
+cors = vector('numeric')
+
+for(df in canc) {
+  if(class(df) == "numeric" && colnames(canc)[count] != "deathRate") {
+    compare_with_deathRate(canc, df, count)
+    cors[count] = cor(canc$deathRate, df)
+  }
+  count = count + 1
+}
+
+tail(sort(cors),5)
+head(sort(cors),5)
 ```
 
 ### Potentially erroneous data
@@ -70,16 +120,36 @@ medianAgeOver100 = subset(cancer, MedianAge >= 100)
 nrow(medianAgeOver100)
 ```
 
-## Univariate Analysis of Key Variables
+## Analysis of Key Relationships
 
 ```{r}
-summary(cancer$deathRate)
-hist(cancer$deathRate, breaks = 20, main = "Death Rate", xlab = NULL)
-```
+# Focus on the variables that exihibited stronger relationships with deathRate
 
-```{r}
+## Top 3 Positive Correlations
+
+cor(cancer$deathRate, cancer$povertyPercent)
+cor(cancer$deathRate, cancer$PctHS25_Over)
+cor(cancer$deathRate, cancer$PctPublicCoverage)
+
+## Top 3 Negative Correlations
+cor(cancer$deathRate, cancer$PctBachDeg25_Over)
+cor(cancer$deathRate, cancer$PctPrivateCoverage)
+cor(cancer$deathRate, cancer$PctMarriedHouseholds)
+
+# Box Plots
+boxplot(deathRate ~ povertyPercent, data = canc,
+        main = "Death Rate",
+  xlab = "Death Rate", ylab = "Poverty Percent")
+
+hist(cancer$povertyPercent, breaks = 20, main = "Poverty Percent", xlab = NULL)
+
+boxplot(deathRate ~ PctBachDeg25_Over, data = canc,
+        main = "Death Rate",
+  xlab = "Death Rate", ylab = "PctBachDeg25_Over")
+
+hist(cancer$PctBachDeg25_Over, breaks = 20, main = "PctBachDeg25_Over", xlab = NULL)
 ```
 
 ## Objective
 
-// Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
+# Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
