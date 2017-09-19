@@ -37,38 +37,135 @@ Cancer = read.csv('cancer.csv')
 ```
 
 ```{r}
-head(Cancer)
 colnames(Cancer)
+nrow(Cancer)
 summary(Cancer)
-```
-
-There is a row where the median age is 624. Almost certainly erroneous.
-```{r}
-maxMedianAge <- max(Cancer$MedianAge)
-indexWithMaxMedianAge <- which(Cancer$MedianAge == maxMedianAge)
-Cancer[indexWithMaxMedianAge,]
+attach(Cancer)
 ```
 
 ```{r}
-hist(Cancer$deathRate)
+histWithMean <- function(vector, name) {
+  hist(vector, col=rgb(0,0,1,1/4), main=paste("Histogram of ", name), xlab=name)
+  abline(v = mean(vector), col="red", lwd=2)
+}
+```
+
+
+```{r}
+histWithMean(deathRate, "deathRate")
+```
+
+### Population
+
+```{r}
+histWithMean(popEst2015, "popEst2015") # looks like "power law distribution"
+histWithMean(log(popEst2015), "log(popEst2015)")
+Cancer$logPopEst2015 = log(popEst2015)
+
+histWithMean(AvgHouseholdSize, "AvgHouseholdSize") # impossible 0's
+histWithMean(AvgHouseholdSize[AvgHouseholdSize > 1], "AvgHouseholdSize")
+cleanAvgHouseholdSize <- AvgHouseholdSize > 1
+
+histWithMean(PercentMarried, "PercentMarried")
+
+histWithMean(avgAnnCount, "avgAnnCount") # looks like "power law distribution"
+histWithMean(log(avgAnnCount), "log(avgAnnCount)")
+Cancer$logAvgAnnCount = log(avgAnnCount)
+
+histWithMean(BirthRate, "BirthRate")
+```
+
+### Age
+
+```{r}
+histWithMean(MedianAge, "MedianAge") # impossible over 200
+histWithMean(MedianAge[MedianAge < 200], "MedianAge")
+cleanMedianAge <- MedianAge < 200
+
+histWithMean(MedianAgeMale, "MedianAgeMale")
+histWithMean(MedianAgeFemale, "MedianAgeFemale")
+```
+
+### Income
+
+```{r}
+histWithMean(medIncome, "medIncome") # looks like "power law distribution"
+histWithMean(log(medIncome), "log(medIncome)")
+Cancer$logMedIncome = log(medIncome)
+
+histWithMean(povertyPercent, "povertyPercent")
+
+plot(deathRate ~ binnedInc)
+
+histWithMean(PctEmployed16_Over, "PctEmployed16_Over") # NA's: 152
+cleanPctEmployed16_Over <- !is.na(PctEmployed16_Over)
+
+histWithMean(PctUnemployed16_Over, "PctUnemployed16_Over")
+```
+
+### Race
+
+```{r}
+histWithMean(PctWhite, "PctWhite")
+histWithMean(PctBlack, "PctBlack")
+histWithMean(PctAsian, "PctAsian")
+histWithMean(PctOtherRace, "PctOtherRace")
+```
+
+### Education
+
+```{r}
+histWithMean(PctNoHS18_24, "PctNoHS18_24")
+histWithMean(PctHS18_24, "PctHS18_24")
+histWithMean(PctHS25_Over, "PctHS25_Over")
+histWithMean(PctSomeCol18_24, "PctSomeCol18_24") # NA's: 2285
+cleanPctSomeCol18_24 <- !is.na(PctSomeCol18_24)
+histWithMean(PctBachDeg18_24, "PctBachDeg18_24")
+histWithMean(PctBachDeg25_Over, "PctBachDeg25_Over")
+```
+
+### Insurance
+
+```{r}
+histWithMean(PctPrivateCoverage, "PctPrivateCoverage")
+histWithMean(PctEmpPrivCoverage, "PctEmpPrivCoverage")
+histWithMean(PctPublicCoverage, "PctPublicCoverage")
 ```
 
 ```{r}
-cor(Cancer$deathRate, Cancer$medIncome)
-cor(Cancer$deathRate, Cancer$povertyPercent)
-cor(Cancer$deathRate, Cancer$PctHS25_Over)
-cor(Cancer$deathRate, Cancer$PctBachDeg25_Over)
-cor(Cancer$deathRate, Cancer$PctBachDeg18_24)
-cor(Cancer$deathRate, Cancer$PctEmployed16_Over)
-cor(Cancer$deathRate, Cancer$PctUnemployed16_Over)
-cor(Cancer$deathRate, Cancer$PctPrivateCoverage)
-cor(Cancer$deathRate, Cancer$PctEmpPrivCoverage)
-cor(Cancer$deathRate, Cancer$PctPublicCoverage)
+# some columns were added, so lets update the attached version
+detach(Cancer)
+attach(Cancer)
 ```
 
+### Get all the numeric type columns, find correlations with deathRate, and sort by descending absolute value
+
 ```{r}
-summary(Cancer$PctEmployed16_Over)
-newFrame <- data.frame(Cancer$PctEmployed16_Over, Cancer$deathRate)
-newFrame <- na.omit(newFrame)
-cor(newFrame)
+numericColumns <- sapply(Cancer, is.numeric)
+NumericCancer <- Cancer[, numericColumns]
+correlations <- apply(NumericCancer, 2, function(col) cor(col, deathRate))
+correlations[order(abs(correlations), decreasing=TRUE)]
+```
+
+### Check correlations for the "cleaned" variables
+
+```{r}
+cor(AvgHouseholdSize[cleanAvgHouseholdSize], deathRate[cleanAvgHouseholdSize])
+cor(MedianAge[cleanMedianAge], deathRate[cleanMedianAge])
+cor(PctEmployed16_Over[cleanPctEmployed16_Over], deathRate[cleanPctEmployed16_Over]) # -0.4120458
+cor(PctSomeCol18_24[cleanPctSomeCol18_24], deathRate[cleanPctSomeCol18_24])
+```
+
+### Plot deathRate with all variables with at least a weak correlation
+
+```{r}
+plot(PctBachDeg25_Over, deathRate, cex=0.2)
+plot(logMedIncome, deathRate, cex=0.2)
+plot(povertyPercent, deathRate, cex=0.2)
+plot(medIncome, deathRate, cex=0.2)
+plot(PctEmployed16_Over[cleanPctEmployed16_Over], deathRate[cleanPctEmployed16_Over], cex=0.2)
+plot(PctHS25_Over, deathRate, cex=0.2)
+plot(PctPublicCoverage, deathRate, cex=0.2)
+plot(PctPrivateCoverage, deathRate, cex=0.2)
+plot(PctUnemployed16_Over, deathRate, cex=0.2)
 ```
