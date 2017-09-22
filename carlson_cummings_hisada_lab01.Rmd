@@ -224,3 +224,108 @@ for (i in 1:length(correlations)) {
 ```
 
 # Analysis of Secondary Effects
+
+## Racial Groups
+
+We identified certain racial groups are exhitibing higher cancer death rate than others, namely black people (`PctBlack`).
+
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+
+# Race-related variables
+raceVars = Cancer[, c("PctWhite", "PctBlack", "PctAsian", "PctOtherRace")]
+
+# get each correlations with each column
+raceCors <- apply(raceVars, 2, function(col) cor(col, deathRate))
+
+for (i in 1:length(raceCors)) {
+  name <- names(raceCors)[i]
+  plotInfo(unlist(Cancer[name]), name, raceCors[i])
+}
+```
+
+While the other groups are showing negative correlations with the death rate, `PctBlack` is showing a mildly strong correlation of 0.257. This at the first glance makes it seem as though black people are somehow more susceptible to cancer.
+
+Looking further, we find `PctBlack` has strong positive correlations with `povertyPercent` and `PctUnemployed16_Over`, which are amongst the variables we have identified to have the strongest positive correlations with `deathRate`. 
+
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+
+plotInfoPctBlack <- function(vec, name, corr) {
+  plot(vec, Cancer$PctBlack, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("PctBlack vs ", name))
+}
+
+plotInfoPctBlack(Cancer$povertyPercent, "povertyPercent", cor(Cancer$PctBlack, Cancer$povertyPercent))
+plotInfoPctBlack(Cancer$PctUnemployed16_Over, "PctUnemployed16_Over", cor(Cancer$PctBlack, Cancer$PctUnemployed16_Over))
+```
+
+We also see negative correlations between `PctBlack` and the variables we have identified to have strong negative correlations with `deathRate` such as `logMedIncome`, `PctBachDeg25_Over` and `PctPrivateCoverage`.
+
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+plotInfoPctBlack(Cancer$logMedIncome, "logMedIncome", cor(Cancer$PctBlack, Cancer$logMedIncome))
+plotInfoPctBlack(Cancer$PctBachDeg25_Over, "PctBachDeg25_Over", cor(Cancer$PctBlack, Cancer$PctBachDeg25_Over))
+plotInfoPctBlack(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$PctBlack, Cancer$PctPrivateCoverage))
+```
+
+Therefore we believe it is not their race that is increasing the cancer death rate for black people but rather the group's relatively poor econoimc standing that is contributing to the elevated `deathRate`. 
+
+## Martial-Status
+
+We are alsso seeing relatively strong negative correlations between martial status-releated variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similary to racial groups, however, after looking at the correlations between the martial-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are less much likely to be in poverty which explains the negative correlation observed rather than people's martial statuses themselves. 
+
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+
+# Martial status-related variables
+marriedVars = Cancer[, c("PercentMarried", "PctMarriedHouseholds")]
+
+# get each correlations with each column
+marriedCors <- apply(marriedVars, 2, function(col) cor(col, deathRate))
+
+for (i in 1:length(marriedCors)) {
+  name <- names(marriedCors)[i]
+  plotInfo(unlist(Cancer[name]), name, marriedCors[i])
+}
+```
+
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+
+# `PctMarried`
+
+plotInfoPctMarried <- function(vec, name, corr) {
+  plot(vec, Cancer$PercentMarried, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("PercentMarried vs ", name))
+}
+
+## Variables positively correlated with `deathRate` 
+plotInfoPctMarried(Cancer$povertyPercent, "povertyPercent", cor(Cancer$PercentMarried, Cancer$povertyPercent))
+plotInfoPctMarried(Cancer$PctUnemployed16_Over, "PctUnemployed16_Over", cor(Cancer$PercentMarried, Cancer$PctUnemployed16_Over))
+
+## Variables negetively correlated with `deathRate` 
+plotInfoPctMarried(Cancer$logMedIncome, "logMedIncome", cor(Cancer$PercentMarried, Cancer$logMedIncome))
+plotInfoPctMarried(Cancer$PctBachDeg25_Over, "PctBachDeg25_Over", cor(Cancer$PercentMarried, Cancer$PctBachDeg25_Over))
+plotInfoPctMarried(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$PercentMarried, Cancer$PctPrivateCoverage))
+
+# `PctMarriedHouseholds`
+
+plotInfoPctMarriedHouseholds <- function(vec, name, corr) {
+  plot(vec, Cancer$PctMarriedHouseholds, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("PctMarriedHouseholds vs ", name))
+}
+
+## Variables positively correlated with `deathRate` 
+plotInfoPctMarriedHouseholds(Cancer$povertyPercent, "povertyPercent", cor(Cancer$PctMarriedHouseholds, Cancer$povertyPercent))
+plotInfoPctMarriedHouseholds(Cancer$PctUnemployed16_Over, "PctUnemployed16_Over", cor(Cancer$PctMarriedHouseholds, Cancer$PctUnemployed16_Over))
+
+## Variables negetively correlated with `deathRate` 
+plotInfoPctMarriedHouseholds(Cancer$logMedIncome, "logMedIncome", cor(Cancer$PctMarriedHouseholds, Cancer$logMedIncome))
+plotInfoPctMarriedHouseholds(Cancer$PctBachDeg25_Over, "PctBachDeg25_Over", cor(Cancer$PctMarriedHouseholds, Cancer$PctBachDeg25_Over))
+plotInfoPctMarriedHouseholds(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$PctMarriedHouseholds, Cancer$PctPrivateCoverage))
+```
+
+# Conclusion
+
+Of the 30 variables included in the Cancer Mortality dataset, we are observing strongest correlations between `deathRate` and the below 9 variables:
+
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+names(correlations)
+```
+
+These variables fall under the categories Insurance coverage, Income Status and Education while variables that are categorized under Region, Population, Birthrate, Race and Martial Status are not showing as strong of relationships with `deathRate`.
+
+From this, we are able to conclude that for the US counties included in the datset, people's economic standing is the deciding factor for their cancer mortality rate rather than geographical factors such as region and population. Other factors such as race and martial status also appear to be directly correlated with `deathRate`. However, we found that these variables have strong correlations with Income Status and Insurance Coverage variables which lead us to suspect it is not the racial demographics or martial statuses of the residents that are diretly influencing `deathRate` but rather their economic implications that are affecting the cancer death rate in these counties.
