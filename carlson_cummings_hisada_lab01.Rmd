@@ -4,32 +4,37 @@ author: "Andrew Carlson, Brandon Cummings, Tako Hisada"
 output: pdf_document
 ---
 
-## Background
-
-In this lab, imagine that your team is hired by a health government agency. They would like to understand factors that predict cancer mortality rates, with the ultimate aim of identifying communities for social interventions, and of understanding which interventions are likely to have the most impact.  Your team was hired to perform an exploratory analysis to help the agency address their goals.
-
-
-## Data
-
-You are given a dataset for a selection of US counties, **"cancer.csv"**.  The dependent (or target) variable in this data is named "deathRate".
-
-The labels of some of the variables are listed below; the rest of the variables should be self-explanatory.
-
-\begin{tabular}{rl}
-avgAnnCount: &"2009-2013 mean incidences per county"\\
-povertyPercent: &"Percent of population below poverty line"\\
-popEst2015: &"Estimated population by county 2015"\\
-PctPrivateCoverage: &"Percentage of the population with private insurance coverage"\\
-PctPublicCoverage: &"Percentage of the population with public insurance coverage"
-\end{tabular}
-
-## Objective
-
-Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# Research Question
+
+Our team was hired by a health government agency that would like to understand factors that predict cancer mortality rates. Their ultimate goal is to identify communities for social interventions and of understanding which interventions are likely to have the most impact. Our main objective is to perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
+
+# Dataset Analysis
+
+```{r load}
+Cancer = read.csv('cancer.csv')  
+```
+
+This dataset consists of `r length(colnames(Cancer)) - 1` variables (not including the index column), all pertaining to county level information. Overall there were about `r nrow(Cancer)` observations per variable.  
+
+The types of variables present in the dataset can be categorized into 8 groups:  
+  
+1) Region  
+2) Population  
+3) Birthrate  
+4) Race  
+5) Marital Status  
+6) Insurance coverage  
+7) Income status  
+8) Education
+
+  
+\newpage
+
+# Data Quality
 
 ```{r load}
 setwd('~/Documents/MIDS/W203/hw/Lab_1/Cancer_EDA')
@@ -44,6 +49,27 @@ This seems like an adequate number of observations to glean associations between
 colnames(Cancer)
 nrow(Cancer)
 ```
+
+Overall the data quality was reasonable and usable. There were some observations in different decimal states, many NAs, and some variables that didn't seem relevant to cancer mortality at all. Other than that we found the data to be easy to analyze. Below are some data observations and assumptions:
+
+##### "deathRate" - This is the column that we have assumed is the number of average yearly deaths per county.  
+
+##### "MedianAge" - This variable is the median age for a county, the dataset column had a range of 22-624, when analyzing this correlation we trimmed all numbers above 65 due to the numbers after 65 started in the 300s.  
+
+##### "PctSomeCol18_2"4 - This is the percent of some college attended between the age of 18-24. This column only had 762 of 3047 observations that were not NA. We still used this column when analyzing correlation, but it is worth noting that we removed all NAs.   
+
+##### "Race" - When it came to the percentage of race for each county, we noticed that a mojority of the counties surveyed were "white". This may or may not be a significant datapoint, but it may lead to assumptions about populations that are incorrect.  
+
+##### "avgAnnCount" - This was clarified as "2009-2013 mean incidences per county", we did not know what "incidences" this was referring to, we ended up not finding a direct correlation with other important variables, so we did not make any further assumptions and left it out of our analysis.  
+
+##### "AvgHouseholdSize" - This had 61 entries with less than 1, meaning that there are observations of 0 or negative household sizes, we removed these when analyzing houshold size with other key variables.  
+
+##### "PctEmployed16_Over" - There were 152 missing observations in this column, we removed these NAs from our dataset when analyzing this column with other key variables.
+
+\pagebreak
+
+
+# Analysis of Key Variables and Relationships
 
 ```{r include=FALSE}
 summary(Cancer)
@@ -149,6 +175,7 @@ count.by(PctSomeCol18_24, is.na)
 cleanPctSomeCol18_24 <- !is.na(PctSomeCol18_24)
 ```
 
+\pagebreak
 
 ## Key Variables
 
@@ -182,6 +209,8 @@ histWithNorm(PctUnemployed16_Over, "PctUnemployed16_Over")
 detach(Cancer)
 attach(Cancer)
 ```
+
+\pagebreak
 
 ## Correlated Variables
 
@@ -236,6 +265,8 @@ correlations
 ```
 
 We will consider correlations of `0.3` or stronger a significant association. This includes 9 of the variables, one of which is our transformed log(medianIncome). This actually had stronger correlation with `deathRate` than `medIncome`.
+
+\pagebreak
 
 ## Plot Bivariate Associations
 
