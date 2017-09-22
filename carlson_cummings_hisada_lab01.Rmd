@@ -15,7 +15,9 @@ Our team was hired by a health government agency that would like to understand f
 # Dataset Analysis
 
 ```{r load}
-Cancer = read.csv('cancer.csv')  
+setwd('~/Documents/MIDS/W203/hw/Lab_1/Cancer_EDA')
+Cancer = read.csv('cancer.csv')
+par(mar = rep(2, 4))
 ```
 
 This dataset consists of `r length(colnames(Cancer)) - 1` variables (not including the index column), all pertaining to county level information. Overall there were about `r nrow(Cancer)` observations per variable.  
@@ -36,19 +38,6 @@ The types of variables present in the dataset can be categorized into 8 groups:
 
 # Data Quality
 
-```{r load}
-setwd('~/Documents/MIDS/W203/hw/Lab_1/Cancer_EDA')
-Cancer = read.csv('cancer.csv')
-par(mar = rep(2, 4))
-```
-
-The CSV data contains **30 variables** (one which is just an index) with **3047 records**.
-This seems like an adequate number of observations to glean associations between variables.
-
-```{r}
-colnames(Cancer)
-nrow(Cancer)
-```
 
 Overall the data quality was reasonable and usable. There were some observations in different decimal states, many NAs, and some variables that didn't seem relevant to cancer mortality at all. Other than that we found the data to be easy to analyze. Below are some data observations and assumptions:
 
