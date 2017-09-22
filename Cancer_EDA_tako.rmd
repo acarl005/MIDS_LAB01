@@ -1,0 +1,155 @@
+---
+title: "Cancer Mortality Exploration"
+author: "w203 Teaching Team"
+output: pdf_document
+---
+
+## Background
+
+In this lab, imagine that your team is hired by a health government agency. They would like to understand factors that predict cancer mortality rates, with the ultimate aim of identifying communities for social interventions, and of understanding which interventions are likely to have the most impact.  Your team was hired to perform an exploratory analysis to help the agency address their goals.
+
+
+## Data
+
+You are given a dataset for a selection of US counties, **"cancer.csv"**.  The dependent (or target) variable in this data is named "deathRate".
+
+The labels of some of the variables are listed below; the rest of the variables should be self-explanatory.
+
+```{r}
+# Load CSV data
+cancer = read.csv("cancer.csv")
+```
+
+## Introduction
+
+```{r}
+# Show variable names
+colnames(cancer)
+```
+
+```{r}
+# Show summary
+summary(cancer)
+```
+
+```{r}
+# Show summary
+length(cancer)
+```
+
+```{r}
+# Show how many observations there are in each variable
+for(df in cancer) {
+  cat(sprintf("Dataframe length: %d\n", length(df)))
+}
+```
+
+## Univariate Analysis of Key Variables
+
+```{r}
+# Create a working copy of the variable cancer
+canc <- cancer
+
+# Summary
+summary(canc$deathRate)
+
+# Histogram
+hist(canc$deathRate, breaks = 20, main = "Death Rate", xlab = NULL)
+```
+
+```{r}
+# Define a function for running a set of compareative methods such as cor(), scattered plot, etc
+compare_with_deathRate <- function(c, df, count) {
+  if(is.na(colnames(c)[count])) {
+    ylabel =  NULL
+  } else {
+    ylabel = colnames(c)[count]
+  }
+
+  # DEBUG  
+  #cat(sprintf("Dataframe name: %s\n", colnames(c)[df]))
+  
+  # Correlation
+  cat(sprintf("Correlation - Death Rate and %s: %f\n", ylabel, cor(c$deathRate, df)))
+  
+  # Scatter Plot
+  plot(jitter(c$deathRate, factor=2), jitter(df, factor=2),  
+       xlab = "Death Rate", ylab = ylabel, 
+       main = "Correlation with Death Rate")
+  abline(lm(c$deathRate ~ df))
+}
+
+# Loop over all numeric variables in canc and analyze
+count <- 1
+cors = vector('numeric')
+
+for(df in canc) {
+  if(class(df) == "numeric" && colnames(canc)[count] != "deathRate") {
+    compare_with_deathRate(canc, df, count)
+    cors[count] = cor(canc$deathRate, df)
+  }
+  count = count + 1
+}
+
+tail(sort(cors),5)
+head(sort(cors),5)
+```
+
+### Potentially erroneous data
+
+```{r}
+# Estimated population by county 2015
+summary(cancer$popEst2015)
+hist(cancer$popEst2015, breaks = 100, main = "Estimated population by county 2015", xlab = NULL)
+# There are 42 countries with population over 1 million
+over1m = subset(cancer, popEst2015 >= 1000000)
+nrow(over1m)
+hist(over1m$popEst2015, breaks = 20, main = "Estimated population by county 2015", xlab = NULL)
+# One county has over 10 million
+over10m = subset(cancer, popEst2015 >= 10000000)
+nrow(over10m)
+```
+
+```{r}
+# Median Age
+summary(cancer$MedianAge)
+hist(cancer$MedianAge, breaks = 10, main = "Median Age", xlab = NULL)
+
+# There are 30 countries with the median age over 100
+medianAgeOver100 = subset(cancer, MedianAge >= 100)
+nrow(medianAgeOver100)
+```
+
+## Analysis of Key Relationships
+
+```{r}
+# Focus on the variables that exihibited stronger relationships with deathRate
+
+## Top 3 Positive Correlations
+
+cor(cancer$deathRate, cancer$povertyPercent)
+cor(cancer$deathRate, cancer$PctHS25_Over)
+cor(cancer$deathRate, cancer$PctPublicCoverage)
+
+## Top 3 Negative Correlations
+cor(cancer$deathRate, cancer$PctBachDeg25_Over)
+cor(cancer$deathRate, cancer$PctPrivateCoverage)
+cor(cancer$deathRate, cancer$PctMarriedHouseholds)
+
+# Box Plots
+boxplot(deathRate ~ povertyPercent, data = canc,
+        main = "Death Rate",
+  xlab = "Death Rate", ylab = "Poverty Percent")
+
+hist(cancer$povertyPercent, breaks = 20, main = "Poverty Percent", xlab = NULL)
+
+boxplot(deathRate ~ PctBachDeg25_Over, data = canc,
+        main = "Death Rate",
+  xlab = "Death Rate", ylab = "PctBachDeg25_Over")
+
+hist(cancer$PctBachDeg25_Over, breaks = 20, main = "PctBachDeg25_Over", xlab = NULL)
+```
+
+## Objective
+
+# Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
