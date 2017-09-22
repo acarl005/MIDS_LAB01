@@ -269,7 +269,7 @@ Therefore we believe it is not their race that is increasing the cancer death ra
 
 ## Martial-Status
 
-We are alsso seeing relatively strong negative correlations between martial status-releated variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similary to racial groups, however, after looking at the correlations between the martial-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are less much likely to be in poverty which explains the negative correlation observed rather than people's martial statuses themselves. 
+We are alsso seeing relatively strong negative correlations between martial status-releated variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similarly to racial groups, however, after looking at the correlations between the martial-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are considerably less likely to be in poverty. This explains the negative correlation observed between the martial status-related variables and `deathRate` rather than people's martial statuses themselves somehow magically reducing the cancer death rate. 
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
