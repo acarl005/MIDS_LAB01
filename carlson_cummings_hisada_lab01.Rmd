@@ -34,10 +34,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load}
 setwd('~/Documents/MIDS/W203/hw/Lab_1/Cancer_EDA')
 Cancer = read.csv('cancer.csv')
+par(mar = rep(2, 4))
 ```
 
-The CSV data contains **30 variables** (one which is just an index) with **3047 records**
-.
+The CSV data contains **30 variables** (one which is just an index) with **3047 records**.
+This seems like an adequate number of observations to glean associations between variables.
+
 ```{r}
 colnames(Cancer)
 nrow(Cancer)
@@ -46,25 +48,45 @@ nrow(Cancer)
 ```{r include=FALSE}
 summary(Cancer)
 attach(Cancer)
-par(mar=c(20,4.1,4.1,2.1))
 ```
 
 ```{r}
 # convenient wrapper function for a prettier histogram
-histWithMean <- function(vec, name) {
-  hist(vec, col=rgb(0,0,1,1/4), main=paste("Histogram of ", name), xlab=name)
+histWithNorm <- function(vec, name) {
+  # calculate the breaks for the histogram
+  vecMin <- min(vec, na.rm=TRUE)
+  vecMax <- max(vec, na.rm=TRUE)
+  breaks <- seq(vecMin, vecMax, length.out=10) 
+  vecHist <- hist(vec, col=rgb(0,0,1,1/4), breaks=breaks, main=paste("Histogram of ", name), xlab=name)
+  
   # add a red line down the mean
-  abline(v = mean(vec, na.rm=TRUE), col="red", lwd=2)
+  vecMean <- mean(vec, na.rm=TRUE)
+  abline(v = vecMean, col="red", lwd=2)
+  
+  # plot a normal distribution over the histogram to visually compare the distributions
+  vecSd <- sd(vec, na.rm=TRUE)
+  # create the domain. span 6 sd's centered at the mean
+  x <- seq(vecMean - 3 * vecSd, vecMean + 3 * vecSd, length.out=100)
+  # get the width between each break
+  histWidth <- breaks[2] - breaks[1]
+  # calculate the area of the histogram and use it as the scale factor
+  scaleFactor <- sum(histWidth * vecHist$counts)
+  curve(dnorm(x, mean=vecMean, sd=vecSd) * scaleFactor, add=TRUE, col="purple", lwd=2)
 }
 ```
 
-The dependant variable for this analysis is `deathRate`, which is assumed to be the death rate from cancer.
+The dependant variable for this analysis is `deathRate`, which is assumed to be the death rate from cancer. The histgram appears normally distributed.
 
-```{r}
-histWithMean(deathRate, "deathRate")
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+histWithNorm(deathRate, "deathRate")
+boxplot(deathRate)
 ```
 
-### Unclean Data
+\newpage
+
+## Anomalous Data
+
+We'll count the number of vector elements that violate some constraints to check for anomalies. If entries are missing or clearly erroneous, we can remove them from the data set before calculating the correlation.
 
 ```{r}
 # function that counts the number of elements in a vector that satisfy the predicate
@@ -83,71 +105,87 @@ count.by <- function(vec, predicate) {
 }
 ```
 
+\medskip
+\medskip
+\medskip
 
 61 of the `AvgHouseholdSize` entries are less than 1. This is probably a coding error. A mean less than 1 for a set of integers is only possible if some values are 0 or negative. These values are nonsensical for a household size.
 
 ```{r}
 count.by(AvgHouseholdSize, function(num) num < 1)
+cleanAvgHouseholdSize <- AvgHouseholdSize >= 1
 ```
 
+\medskip
+\medskip
+\medskip
 
 30 of the `MedianAge` entries are greater than 200. This seems flagrantly improbable.
 
 ```{r}
-count.by(MedianAge, function(num) num > 200)
+count.by(MedianAge, function(num) num >= 200)
+cleanMedianAge <- MedianAge < 200
 ```
 
+\medskip
+\medskip
+\medskip
 
 152 of the `PctEmployed16_Over` entries are `NA`.
 
 ```{r}
 count.by(PctEmployed16_Over, is.na)
+cleanPctEmployed16_Over <- !is.na(PctEmployed16_Over)
 ```
 
+\medskip
+\medskip
+\medskip
 
-2285 of the `PctSomeCol18_24` entries are `NA`.
+2285 of the `PctSomeCol18_24` entries are `NA`. This is most of the rows, but there are still enough for a meaningful association.
 
 ```{r}
 count.by(PctSomeCol18_24, is.na)
+cleanPctSomeCol18_24 <- !is.na(PctSomeCol18_24)
 ```
 
 
-### Correlated Variables
+## Key Variables
 
-Here are some histograms of the variables that turned out to be related to `deathRate`.
+Here are some histograms of the variables that turned out to be related to `deathRate`. How we determined this in the **correlated variables** section.
 
 `medIncome` looks like a positively skewed distribution. In fact, in some populations it may look more like a power law distribution than a normal [[link]](https://arxiv.org/pdf/1304.0212.pdf). If we plot `log(medIncome)`, it *looks* closer to a normal distribution. We can check this transformation for correlation with `deathRate` in addition to the plain `medIncome` variable.
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
-histWithMean(medIncome, "medIncome")
-histWithMean(log(medIncome), "log(medIncome)")
+histWithNorm(medIncome, "medIncome")
+histWithNorm(log(medIncome), "log(medIncome)")
 ```
 
 ```{r}
 Cancer$logMedIncome <- log(medIncome)
 ```
 
-The rest look like clean, valid data. There are no obvious transformations to apply.
+The rest look like clean, valid, approximately normally-distributed variables. There are no obvious transformations to apply.
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
-histWithMean(PctBachDeg25_Over, "PctBachDeg25_Over")
-histWithMean(povertyPercent, "povertyPercent")
-histWithMean(PctEmployed16_Over, "PctEmployed16_Over")
-histWithMean(PctHS25_Over, "PctHS25_Over")
-histWithMean(PctPublicCoverage, "PctPublicCoverage")
-histWithMean(PctPrivateCoverage, "PctPrivateCoverage")
-histWithMean(PctUnemployed16_Over, "PctUnemployed16_Over")
+histWithNorm(PctBachDeg25_Over, "PctBachDeg25_Over")
+histWithNorm(povertyPercent, "povertyPercent")
+histWithNorm(PctEmployed16_Over, "PctEmployed16_Over")
+histWithNorm(PctHS25_Over, "PctHS25_Over")
+histWithNorm(PctPublicCoverage, "PctPublicCoverage")
+histWithNorm(PctPrivateCoverage, "PctPrivateCoverage")
+histWithNorm(PctUnemployed16_Over, "PctUnemployed16_Over")
 ```
 
-```{r include=FALSE}
+```{r echo=FALSE}
 # some columns were added, so lets update the attached version
 detach(Cancer)
 attach(Cancer)
 ```
 
-### Finding strongest correlations
+## Correlated Variables
 
-The numeric variables were taken. The correlation with each numeric variable was calculated and sorted by descending absolute value.
+The numeric variables were taken. The correlation with each numeric variable was calculated. Some of these variables had `NA`s, so those will get removed.
 
 ```{r}
 # get just the numeric columns
@@ -158,34 +196,50 @@ correlations <- apply(NumericCancer, 2, function(col) cor(col, deathRate))
 correlations <- correlations[!is.na(correlations)]
 ```
 
-Now we have a vector of all the correlations. We just filtered out the `NA`s, which includes `PctEmployed16_Over` because some of the entries were `NA`. We'll have to add it back manually after dealing with the `NA`s.
+Now we have a vector of all the correlations. We just filtered out the anomalous data, which includes `PctEmployed16_Over` because some of the entries were `NA`. We'll have to add it back manually after dealing with the `NA`s.
 
 ```{r}
-# clean the NAs out of PctEmployed16_Over and calculate correlation
-cleanPctEmployed16_Over <- !is.na(PctEmployed16_Over)
-corPctEmployed16_Over <- cor(PctEmployed16_Over[cleanPctEmployed16_Over], deathRate[cleanPctEmployed16_Over])
+# clean the  out of PctEmployed16_Over and calculate correlation
+corPctEmployed16_Over <- cor(PctEmployed16_Over[cleanPctEmployed16_Over],
+                             deathRate[cleanPctEmployed16_Over])
 # append it to the vector of correlations and name the entry
 correlations <- c(correlations, corPctEmployed16_Over)
 names(correlations)[length(correlations)] <- "PctEmployed16_Over"
+
+# add the rest of the cleaned variables
+corPctSomeCol18_24 <- cor(PctSomeCol18_24[cleanPctSomeCol18_24],
+                          deathRate[cleanPctSomeCol18_24])
+correlations <- c(correlations, corPctSomeCol18_24)
+names(correlations)[length(correlations)] <- "PctSomeCol18_24"
+
+corAvgHouseholdSize <- cor(AvgHouseholdSize[cleanAvgHouseholdSize],
+                           deathRate[cleanAvgHouseholdSize])
+correlations <- c(correlations, corAvgHouseholdSize)
+names(correlations)[length(correlations)] <- "cleanAvgHouseholdSize"
+
+corMedianAge <- cor(MedianAge[cleanMedianAge],
+                    deathRate[cleanMedianAge])
+correlations <- c(correlations, corMedianAge)
+names(correlations)[length(correlations)] <- "cleanMedianAge"
+correlations
 ```
 
-Now we can focus on the correlations that are significant.
+Now we can determine the correlations that are significant. We'll sort these by descending order of absolute value.
 
 ```{r}
 # sort them
 correlations <- correlations[order(abs(correlations), decreasing=TRUE)]
+# remove the cor of deathRate with itself, which is 1, and always the first element after sorting
 correlations <- correlations[2:length(correlations)]
 correlations <- correlations[abs(correlations) >= 0.3]
 correlations
 ```
 
-We will consider correlations of `0.3` or greater a significant association. This includes 9 of the variables, one of which is our transformed log(medianIncome). This actually had stronger correlation with `deathRate` than `medIncome`.
+We will consider correlations of `0.3` or stronger a significant association. This includes 9 of the variables, one of which is our transformed log(medianIncome). This actually had stronger correlation with `deathRate` than `medIncome`.
 
-### Plot deathRate with all variables with at least a weak correlation
+## Plot Bivariate Associations
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
-
-#par(mar=c(8,4,6,2))
 plotInfo <- function(vec, name, corr) {
   plot(vec, deathRate, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("deathRate vs ", name))
 }
@@ -195,3 +249,12 @@ for (i in 1:length(correlations)) {
   plotInfo(unlist(Cancer[name]), name, correlations[i])
 }
 ```
+
+
+These variables have a positive correlation, meaning counties in this set which have higher values are more likely to have a higher `deathRate`: `povertyPercent, PctHS25_Over, PctPublicCoverage, PctUnemployed16_Over`. The rest of the variables are associated with lower `deathRate`: `PctBachDeg25_Over, logMedIncome, medIncome, PctEmployed16_Over, PctPrivateCoverage`.
+
+
+## Confounding Variables
+
+The correlations can be summarized as such: employment, education, and wealth are linked to lower cancer mortality. We can speculate about the underlying causality between some of the variables. For example, suppose the correlation with `PctBachDeg25_Over` is because educated people are aware of cancer causes and choose to avoid those causes. Education also enables people to make more money. `PctBachDeg25_Over` would therefore confound the association between `medIncome` and `deathRate`. However, suppose it's actually income that lowers cancer mortality because people can afford better treatment. In that case, its `medIncome` that confounds the association of `PctBachDeg25_Over` with `deathRate` because the wealthy are more likely to afford tuition for school. A similar statement can be made about the insurance variables.
+
