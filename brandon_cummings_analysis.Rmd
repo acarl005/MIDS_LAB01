@@ -1,0 +1,266 @@
+---
+title: "Cancer EDA"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+# Introduction
+
+Research Question: Perform an exploratory analysis to understand how county-level characteristics are related to cancer mortality.
+
+```{r}
+setwd("~/Desktop/Courses/W203 - Stat for Data Science/Lab_1/MIDS_LAB01")
+data = read.csv("cancer.csv")
+```
+
+Number of Variables: `r length(colnames(data))`  
+Number of Observations: `r nrow(data)`  
+
+### Variables: 
+This dataset contains variables describing county, region, population, birthrate, race, marital status, insurance coverage, income status, and education.
+```{r}
+colnames(data)
+```
+
+## Variable clarification and assumption
+PctPrivateCoverage: "Percentage of the population with private insurance coverage"  
+       avgAnnCount: "2009-2013 mean incidences per county WHAT DOES THIS MEAN????"  
+    povertyPercent: "Percent of population below poverty line"  
+        popEst2015: "Estimated population by county 2015"  
+ PctPublicCoverage: "Percentage of the population with public insurance coverage"  
+         deathRate: "Number of deaths attributed to cancer"  
+         binnedInc: "Income groups????"
+         medianAge: "We removed all median ages above 100"
+
+
+## Data Quality
+1) The sample size seems to be large enough to get valuable insight.
+2) The data seems to be collected in different number formats, even for the same columns. Some have integers, some have floats with one decimal, others many decimals.
+3) Seems to be a number of obeservations that are NA of 18-24 with some college, `r sum(is.na(data$PctSomeCol18_24))` to be exact.
+
+# Univariate Analysis of Key Variables
+
+The key variables that we focused on are in groups related to the variable deathRate:
+
+### Death Rate
+```{r}
+summary(data$deathRate)
+deathPercentOfPopulation = data$deathRate/data$popEst2015
+hist(data$deathRate, main = "Death Rate Frequency", xlab = "Deaths Per County")
+```
+The avg deathrate of cancer is between 150-200
+
+### Population: popEst2015, AvgHouseholdSize, PercentMarried, Geography, avgAnnCount, BirthRate, binnedInc
+
+```{r}
+plot(data$popEst2015 ~ data$BirthRate)
+# Higher population does not correlate with higher birth rate
+plot(
+  data$deathRate ~ data$popEst2015,
+  main = "Death rate and Population",
+  xlab = "Population",
+  ylab ="Death Rate of Pop"
+)
+# Higher population does not correlate with high cancer deathrate
+plot(
+  deathPercentOfPopulation ~ data$BirthRate, 
+  main = "Death rate and birth rate percent of Pop.",
+  xlab = "Birth Percent of Pop.",
+  ylab ="Death Rate Percent of Pop"
+)
+```
+Conclusion on Population variables: 
+- It doesn't seem that high birth rate or population correlates to higher cancer mortality.
+- We removed avg household size, percent married, geography, angAnnCount, and binned income from analysis due to perceieved irrelevance.
+
+### Age: MedianAge, MedianAgeMale, MedianAgeFemale
+
+```{r}
+reasonable_median_age = subset(data, MedianAge <= 100)
+plot(
+  reasonable_median_age$deathRate ~ reasonable_median_age$MedianAge,
+  main = "Median Age And Cancer Death Rate",
+  xlab = "Median Age",
+  ylab = "Death Rate"
+)
+
+plot(
+  reasonable_median_age$deathRate ~ reasonable_median_age$MedianAgeMale,
+  main = "Median Age Male And Cancer Death Rate",
+  xlab = "Median Age Male",
+  ylab = "Death Rate"
+)
+
+plot(
+  reasonable_median_age$deathRate ~ reasonable_median_age$MedianAgeFemale,
+  main = "Median Age Female And Cancer Death Rate",
+  xlab = "Median Age Female",
+  ylab = "Death Rate"
+)
+```
+Conclusion of Age Variables:
+- We removed all median ages above 100 due to some anomalies of median age 300+.
+- There seems to be a large cancer mortality rate between the 30-50 years of age.
+- Women seem to group just above 40 and men just under 40 with county deathrates.
+
+### Income: medIncome, povertyPercent, binnedInc, PctEmployed16_Over, PctUnemployed16_Over
+
+```{r}
+plot(
+  data$deathRate ~ data$medIncome,
+  main = "Median Income And Cancer Mortality",
+  xlab = "Median Income",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctEmployed16_Over,
+  main = "Employed 16yrs old or older And Cancer Mortality",
+  xlab = "People Employed 16 Years Old or Older",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$povertyPercent,
+  main = "People In Poverty And Cancer Mortality",
+  xlab = "People In Poverty",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctUnemployed16_Over,
+  main = "Unemployed 16yrs old or older And Cancer Mortality",
+  xlab = "People Unemployed 16 Years Old or Older",
+  ylab = "Death Rate"
+)
+```
+
+Conclusion on Income Variables:
+- The strongest correlation yet
+- As poverty and unemployment goes up, so does cancer mortality
+- As median income and employment rise, cancer mortality decreases
+
+### Race: PctWhite, PctBlack, PctAsian, PctOtherRace
+
+```{r}
+plot(
+  data$deathRate ~ data$PctWhite,
+  main = "Percent Race 'White' And Cancer Mortality",
+  xlab = "Percent Race 'White'",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctBlack,
+  main = "Percent Race 'Black' And Cancer Mortality",
+  xlab = "Percent Race 'Black'",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctAsian,
+  main = "Percent Race 'Asian' And Cancer Mortality",
+  xlab = "Percent Race 'Asian'",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctOtherRace,
+  main = "Percent Race 'Other' And Cancer Mortality",
+  xlab = "Percent Race 'Other'",
+  ylab = "Death Rate"
+)
+```
+
+Conclusion on Race Variables:
+- It seems that many of the counties surveyed were a moajority race 'White'
+- The death rate seemed to hover around its avg for every race, no major correlation detected
+
+### Education: PctNoHS18_24, PctHS18_24, PctHS25_Over, PctSomeCol18_24, PctBachDeg18_24, PctBachDeg25_Over
+
+```{r}
+plot(
+  data$deathRate ~ data$PctNoHS18_24,
+  main = "Percent No HS Education 18-24 And Cancer Mortality",
+  xlab = "Percent No HS Education 18-24",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctHS18_24,
+  main = "Percent HS Education 18-24 And Cancer Mortality",
+  xlab = "Percent HS Education 18-24",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctHS25_Over,
+  main = "Percent HS Education 25+ And Cancer Mortality",
+  xlab = "Percent HS Education 25+",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctSomeCol18_24,
+  main = "Percent Some College 18-24 And Cancer Mortality",
+  xlab = "Percent Some College 18-24",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctBachDeg18_24,
+  main = "Percent College Grad 18-24 And Cancer Mortality",
+  xlab = "Percent College Grad 18-24",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctBachDeg25_Over,
+  main = "Percent College Grad 25+ And Cancer Mortality",
+  xlab = "Percent College Grad 25+",
+  ylab = "Death Rate"
+)
+```
+Conclusion of Education Variables:
+- As a population is more educated, cancer mortality falls
+- It seems that college grauates make up less percent of cancer moratility population
+
+
+### Insurance Coverage: PctPrivateCoverage, PctEmpPrivCoverage, PctPublicCoverage
+
+```{r}
+plot(
+  data$deathRate ~ data$PctPrivateCoverage,
+  main = "Percent of Private Insurance And Cancer Mortality",
+  xlab = "Percent of Private Insurance",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctEmpPrivCoverage,
+  main = "Percent of Employer Private Insurance And Cancer Mortality",
+  xlab = "Percent of Employer Private Insurance",
+  ylab = "Death Rate"
+)
+plot(
+  data$deathRate ~ data$PctEmpPrivCoverage,
+  main = "Percent of Public Insurance And Cancer Mortality",
+  xlab = "Percent of Public Insurance",
+  ylab = "Death Rate"
+)
+```
+
+Conclusion on Insurance Variables:
+- It seems when a population has private insurance cancer mortality is down
+- When a population has public insurance, cancer mortality is up
+- Public coverage could be correlated by income/poverty/unemployment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
