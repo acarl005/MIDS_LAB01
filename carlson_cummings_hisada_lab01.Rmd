@@ -15,7 +15,6 @@ Our team was hired by a health government agency that would like to understand f
 # Dataset Analysis
 
 ```{r load}
-setwd('~/Documents/MIDS/W203/hw/Lab_1/Cancer_EDA')
 Cancer = read.csv('cancer.csv')
 par(mar = rep(2, 4))
 ```
@@ -33,6 +32,8 @@ The types of variables present in the dataset can be categorized into 8 groups:
 7) Income status  
 8) Education
 
+\medskip
+
 All variables in dataset:
 
 ```{r}
@@ -41,13 +42,13 @@ colnames(Cancer)
 \newpage
 # Data Quality
 
-Overall the data quality was reasonable and usable. There were some observations in different decimal states, many NAs, and some variables that didn't seem relevant to cancer mortality at all. Other than that we found the data to be easy to analyze. Below are some data observations and assumptions:
+Overall the data quality was reasonable and usable. There were some observations in different decimal states, many NAs, and some variables that didn't seem relevant to cancer mortality at all, but rather pointed stronger to secondary effects. Other than that we found the data to be easy to analyze. Below are some data observations and assumptions:
 
-##### "deathRate" - This is the column that we have assumed is the number of average yearly deaths per county.  
+##### "deathRate" - This is the column that we have assumed is the number of average yearly deaths per county due to cancer.  
 
 ##### "MedianAge" - This variable is the median age for a county, the dataset column had a range of 22-624, when analyzing this correlation we trimmed all numbers above 65 due to the numbers after 65 started in the 300s.  
 
-##### "PctSomeCol18_2"4 - This is the percent of some college attended between the age of 18-24. This column only had 762 of 3047 observations that were not NA. We still used this column when analyzing correlation, but it is worth noting that we removed all NAs.   
+##### "PctSomeCol18_24" - This is the percent of some college attended between the age of 18-24. This column only had 762 of 3047 observations that were not NA. We still used this column when analyzing correlation, but it is worth noting that we removed all NAs.   
 
 ##### "Race" - When it came to the percentage of race for each county, we noticed that a mojority of the counties surveyed were "white". This may or may not be a significant datapoint, but it may lead to assumptions about populations that are incorrect.  
 
@@ -75,7 +76,12 @@ histWithNorm <- function(vec, name) {
   vecMin <- min(vec, na.rm=TRUE)
   vecMax <- max(vec, na.rm=TRUE)
   breaks <- seq(vecMin, vecMax, length.out=10) 
-  vecHist <- hist(vec, col=rgb(0,0,1,1/4), breaks=breaks, main=paste("Histogram of ", name), xlab=name)
+  vecHist <- hist(
+    vec, col=rgb(0,0,1,1/4),
+    breaks=breaks,
+    main=paste("Histogram of ",name),
+    xlab=name
+  )
   
   # add a red line down the mean
   vecMean <- mean(vec, na.rm=TRUE)
@@ -93,7 +99,7 @@ histWithNorm <- function(vec, name) {
 }
 ```
 
-The dependant variable for this analysis is `deathRate`, which is assumed to be the death rate from cancer. The histgram appears normally distributed.
+The dependent variable for this analysis is `deathRate`, which is assumed to be the death rate from cancer. The histogram appears normally distributed.
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 histWithNorm(deathRate, "deathRate")
@@ -108,7 +114,8 @@ We'll count the number of vector elements that violate some constraints to check
 
 ```{r}
 # function that counts the number of elements in a vector that satisfy the predicate
-# convenient for checking certain sanity bounds and counting how many are out of the bounds
+# convenient for checking certain sanity bounds and counting how many are out of 
+# the bounds
 count.by <- function(vec, predicate) {
   yes <- 0
   no <- 0
@@ -125,7 +132,6 @@ count.by <- function(vec, predicate) {
 
 \medskip
 \medskip
-\medskip
 
 61 of the `AvgHouseholdSize` entries are less than 1. This is probably a coding error. A mean less than 1 for a set of integers is only possible if some values are 0 or negative. These values are nonsensical for a household size.
 
@@ -134,7 +140,6 @@ count.by(AvgHouseholdSize, function(num) num < 1)
 cleanAvgHouseholdSize <- AvgHouseholdSize >= 1
 ```
 
-\medskip
 \medskip
 \medskip
 
@@ -147,7 +152,6 @@ cleanMedianAge <- MedianAge < 200
 
 \medskip
 \medskip
-\medskip
 
 152 of the `PctEmployed16_Over` entries are `NA`.
 
@@ -155,10 +159,6 @@ cleanMedianAge <- MedianAge < 200
 count.by(PctEmployed16_Over, is.na)
 cleanPctEmployed16_Over <- !is.na(PctEmployed16_Over)
 ```
-
-\medskip
-\medskip
-\medskip
 
 2285 of the `PctSomeCol18_24` entries are `NA`. This is most of the rows, but there are still enough for a meaningful association.
 
@@ -208,6 +208,8 @@ attach(Cancer)
 
 The numeric variables were taken. The correlation with each numeric variable was calculated. Some of these variables had `NA`s, so those will get removed.
 
+\medskip
+\medskip
 ```{r}
 # get just the numeric columns
 numericColumns <- sapply(Cancer, is.numeric)
@@ -216,9 +218,13 @@ NumericCancer <- Cancer[, numericColumns]
 correlations <- apply(NumericCancer, 2, function(col) cor(col, deathRate))
 correlations <- correlations[!is.na(correlations)]
 ```
+\medskip
+\medskip
 
 Now we have a vector of all the correlations. We just filtered out the anomalous data, which includes `PctEmployed16_Over` because some of the entries were `NA`. We'll have to add it back manually after dealing with the `NA`s.
 
+\medskip
+\medskip
 ```{r}
 # clean the  out of PctEmployed16_Over and calculate correlation
 corPctEmployed16_Over <- cor(PctEmployed16_Over[cleanPctEmployed16_Over],
@@ -242,6 +248,11 @@ corMedianAge <- cor(MedianAge[cleanMedianAge],
                     deathRate[cleanMedianAge])
 correlations <- c(correlations, corMedianAge)
 names(correlations)[length(correlations)] <- "cleanMedianAge"
+```
+
+\pagebreak
+
+```{r}
 correlations
 ```
 
@@ -275,15 +286,17 @@ for (i in 1:length(correlations)) {
 
 These variables have a positive correlation, meaning counties in this set which have higher values are more likely to have a higher `deathRate`: `povertyPercent, PctHS25_Over, PctPublicCoverage, PctUnemployed16_Over`. The rest of the variables are associated with lower `deathRate`: `PctBachDeg25_Over, logMedIncome, medIncome, PctEmployed16_Over, PctPrivateCoverage`.
 
+\pagebreak
+
 # Analysis of Secondary Effects
 
 ## Confounding Variables
 
-The correlations can be summarized as such: employment, education, and wealth are linked to lower cancer mortality. We can speculate about the underlying causality between some of the variables. For example, suppose the correlation with `PctBachDeg25_Over` is because educated people are aware of cancer causes and choose to avoid those causes. Education also enables people to make more money. `PctBachDeg25_Over` would therefore confound the association between `medIncome` and `deathRate`. However, suppose it's actually income that lowers cancer mortality because people can afford better treatment. In that case, its `medIncome` that confounds the association of `PctBachDeg25_Over` with `deathRate` because the wealthy are more likely to afford tuition for school. A similar statement can be made about the insurance variables.
+As we analyzed the dataset, we observed some interesting correlations between some of the variables. At first glance, these correlations suggest that there are potentially causal relationships which are not in alignment with our general understanding of how cancer operates and its effects it has on us. Deeper analysis into the dataset however revealed these relationship are results of confounding associations these variables have with other variables that are more directly contributing to the correlations with  `deathRate` we are observing. 
 
 ## Racial Groups
 
-We identified certain racial groups are exhitibing higher cancer death rate than others, namely black people (`PctBlack`).
+We identified certain racial groups are exhibiting higher cancer death rate than others, namely black people (`PctBlack`).
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
@@ -299,9 +312,9 @@ for (i in 1:length(raceCors)) {
 }
 ```
 
-While the other groups are showing negative correlations with the death rate, `PctBlack` is showing a mildly strong correlation of 0.257. This at the first glance makes it seem as though black people are somehow more susceptible to cancer.
+While the other groups are showing negative correlations with the death rate, `PctBlack` is showing a positive correlation of 0.257. This makes it seem as though black people are somehow more susceptible to cancer.
 
-Looking further, we find `PctBlack` has strong positive correlations with `povertyPercent` and `PctUnemployed16_Over`, which are amongst the variables we have identified to have the strongest positive correlations with `deathRate`. 
+Looking further, we find `PctBlack` has strong positive correlations with `povertyPercent` and `PctUnemployed16_Over`, which are among the variables we have identified to have the strongest positive correlations with `deathRate`. 
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
@@ -321,15 +334,15 @@ plotInfoPctBlack(Cancer$PctBachDeg25_Over, "PctBachDeg25_Over", cor(Cancer$PctBl
 plotInfoPctBlack(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$PctBlack, Cancer$PctPrivateCoverage))
 ```
 
-Therefore we believe it is not their race that is increasing the cancer death rate for black people but rather the group's relatively poor econoimc standing that is contributing to the elevated `deathRate`. 
+Therefore we believe it is not their race that is increasing the cancer death rate for black people but rather the group's relatively poor economic standing that is contributing to the elevated `deathRate`. 
 
-## Martial-Status
+## Marital-Status
 
-We are alsso seeing relatively strong negative correlations between martial status-releated variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similarly to racial groups, however, after looking at the correlations between the martial-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are considerably less likely to be in poverty. This explains the negative correlation observed between the martial status-related variables and `deathRate` rather than people's martial statuses themselves somehow magically reducing the cancer death rate. 
+We are also seeing negative correlations between marital status-related variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similarly to racial groups, however, after looking at the correlations between the marital-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are considerably less likely to be in poverty. This explains the negative correlation observed between the marital status-related variables and `deathRate` rather than people's marital statuses themselves somehow magically reducing the cancer death rate. 
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
-# Martial status-related variables
+# Marital status-related variables
 marriedVars = Cancer[, c("PercentMarried", "PctMarriedHouseholds")]
 
 # get each correlations with each column
@@ -374,6 +387,12 @@ plotInfoPctMarriedHouseholds(Cancer$PctBachDeg25_Over, "PctBachDeg25_Over", cor(
 plotInfoPctMarriedHouseholds(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$PctMarriedHouseholds, Cancer$PctPrivateCoverage))
 ```
 
+## Employment, Education and Wealth
+
+The correlations can be summarized as such: employment, education, and wealth are linked to lower cancer mortality. We can speculate about the underlying causality between some of the variables. For example, suppose the correlation with `PctBachDeg25_Over` is because educated people are aware of cancer causes and choose to avoid those causes. Education also enables people to make more money. `PctBachDeg25_Over` would therefore confound the association between `medIncome` and `deathRate`. However, suppose it's actually income that lowers cancer mortality because people can afford better treatment. In that case, its `medIncome` that confounds the association of `PctBachDeg25_Over` with `deathRate` because the wealthy are more likely to afford tuition for school. A similar statement can be made about the insurance variables.
+
+\pagebreak
+
 # Conclusion
 
 Of the 30 variables included in the Cancer Mortality dataset, we are observing strongest correlations between `deathRate` and the below 9 variables:
@@ -382,8 +401,8 @@ Of the 30 variables included in the Cancer Mortality dataset, we are observing s
 names(correlations)
 ```
 
-These variables fall under the categories Insurance coverage, Income Status and Education while variables that are categorized under Region, Population, Birthrate, Race and Martial Status are not showing as strong of relationships with `deathRate`.
+These variables fall under the categories Insurance coverage, Income Status and Education while variables that are categorized under Region, Population, Birthrate, Race and Marital Status are not showing as strong of relationships with `deathRate`.
 
-From this, we are able to conclude that for the US counties included in the datset, people's economic standing is the deciding factor for their cancer mortality rate rather than geographical factors such as region and population. Other factors such as race and martial status also appear to be directly correlated with `deathRate`. However, we found that these variables have strong correlations with Income Status and Insurance Coverage variables which lead us to suspect it is not the racial demographics or martial statuses of the residents that are diretly influencing `deathRate` but rather their economic implications that are affecting the cancer death rate in these counties.
+From this, we are able to conclude that for the US counties included in the dataset, people's economic standing is the deciding factor for their cancer mortality rate rather than geographical factors such as region and population. Other factors such as race and marital status also appear to be directly correlated with `deathRate`. However, we found that these variables have strong correlations with Income Status and Insurance Coverage variables which lead us to suspect it is not the racial demographics or marital statuses of the residents that are directly influencing `deathRate` but rather their economic implications that are affecting the cancer death rate in these counties.
 
 These variables have a positive correlation, meaning counties in this set which have higher values are more likely to have a higher `deathRate`: `povertyPercent, PctHS25_Over, PctPublicCoverage, PctUnemployed16_Over`. The rest of the variables are associated with lower `deathRate`: `PctBachDeg25_Over, logMedIncome, medIncome, PctEmployed16_Over, PctPrivateCoverage`.
