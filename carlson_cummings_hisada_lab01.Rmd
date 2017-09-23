@@ -340,6 +340,7 @@ Therefore we believe it is not their race that is increasing the cancer death ra
 
 We are also seeing negative correlations between marital status-related variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similarly to racial groups, however, after looking at the correlations between the marital-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are considerably less likely to be in poverty. This explains the negative correlation observed between the marital status-related variables and `deathRate` rather than people's marital statuses themselves somehow magically reducing the cancer death rate. 
 
+
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
 # Marital status-related variables
@@ -386,6 +387,7 @@ plotInfoPctMarriedHouseholds(Cancer$logMedIncome, "logMedIncome", cor(Cancer$Pct
 plotInfoPctMarriedHouseholds(Cancer$PctBachDeg25_Over, "PctBachDeg25_Over", cor(Cancer$PctMarriedHouseholds, Cancer$PctBachDeg25_Over))
 plotInfoPctMarriedHouseholds(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$PctMarriedHouseholds, Cancer$PctPrivateCoverage))
 ```
+\pagebreak
 
 ## Employment, Education and Wealth
 
@@ -403,6 +405,6 @@ names(correlations)
 
 These variables fall under the categories Insurance coverage, Income Status and Education while variables that are categorized under Region, Population, Birthrate, Race and Marital Status are not showing as strong of relationships with `deathRate`.
 
-From this, we are able to conclude that for the US counties included in the dataset, people's economic standing is the deciding factor for their cancer mortality rate rather than geographical factors such as region and population. Other factors such as race and marital status also appear to be directly correlated with `deathRate`. However, we found that these variables have strong correlations with Income Status and Insurance Coverage variables which lead us to suspect it is not the racial demographics or marital statuses of the residents that are directly influencing `deathRate` but rather their economic implications that are affecting the cancer death rate in these counties.
+The following variables have a positive correlation, meaning counties in this set which have higher values are more likely to have a higher `deathRate`: `povertyPercent, PctHS25_Over, PctPublicCoverage, PctUnemployed16_Over`. The rest of the variables are associated with lower `deathRate`: `PctBachDeg25_Over, logMedIncome, medIncome, PctEmployed16_Over, PctPrivateCoverage`.
 
-These variables have a positive correlation, meaning counties in this set which have higher values are more likely to have a higher `deathRate`: `povertyPercent, PctHS25_Over, PctPublicCoverage, PctUnemployed16_Over`. The rest of the variables are associated with lower `deathRate`: `PctBachDeg25_Over, logMedIncome, medIncome, PctEmployed16_Over, PctPrivateCoverage`.
+From this, we are able to conclude that for the US counties included in the dataset, people's economic standing is the deciding factor for their cancer mortality rate rather than geographical factors such as region and population. Other factors such as race and marital status also appear to be directly correlated with `deathRate`. However, we found that these variables have strong correlations with Income Status and Insurance Coverage variables which lead us to suspect it is not the racial demographics or marital statuses of the residents that are directly influencing `deathRate` but rather their economic implications that are affecting the cancer death rate in these counties.
