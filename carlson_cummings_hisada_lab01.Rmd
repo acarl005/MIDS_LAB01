@@ -275,7 +275,7 @@ We will consider correlations of `0.3` or stronger a significant association. Th
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 plotInfo <- function(vec, name, corr) {
-  plot(vec, deathRate, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("deathRate vs ", name))
+  plot(vec, deathRate, cex=0.2, sub=paste("r = ", round(corr, digits=3)), xlab=name, main=paste("deathRate vs ", name))
 }
 
 for (i in 1:length(correlations)) {
@@ -292,7 +292,7 @@ These variables have a positive correlation, meaning counties in this set which 
 
 ## Confounding Variables
 
-As we analyzed the dataset, we observed some interesting correlations between some of the variables. At first glance, these correlations suggest that there are potentially causal relationships which are not in alignment with our general understanding of how cancer operates and its effects it has on us. Deeper analysis into the dataset however revealed these relationship are results of confounding associations these variables have with other variables that are more directly contributing to the correlations with  `deathRate` we are observing. 
+As we analyzed the dataset, we observed some interesting correlations between some of the variables and `deathRate`. At first glance, these correlations suggest that there are potentially causal relationships which are not in alignment with our general understanding of how cancer operates and its effects it has on us. Deeper analysis into the dataset however revealed that these are confounding variables that have associations with other variables that are more directly contributing to the observed correlations with `deathRate`.
 
 ## Racial Groups
 
@@ -319,7 +319,7 @@ Looking further, we find `PctBlack` has strong positive correlations with `pover
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
 plotInfoPctBlack <- function(vec, name, corr) {
-  plot(vec, Cancer$PctBlack, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("PctBlack vs ", name))
+  plot(vec, Cancer$PctBlack, cex=0.2, sub=paste("r = ", round(corr, digits=3)), xlab=name, main=paste("PctBlack vs ", name))
 }
 
 plotInfoPctBlack(Cancer$povertyPercent, "povertyPercent", cor(Cancer$PctBlack, Cancer$povertyPercent))
@@ -360,7 +360,7 @@ for (i in 1:length(marriedCors)) {
 # `PctMarried`
 
 plotInfoPctMarried <- function(vec, name, corr) {
-  plot(vec, Cancer$PercentMarried, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("PercentMarried vs ", name))
+  plot(vec, Cancer$PercentMarried, cex=0.2, sub=paste("r = ", round(corr, digits=3)), xlab=name, main=paste("PercentMarried vs ", name))
 }
 
 ## Variables positively correlated with `deathRate` 
@@ -375,7 +375,7 @@ plotInfoPctMarried(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$P
 # `PctMarriedHouseholds`
 
 plotInfoPctMarriedHouseholds <- function(vec, name, corr) {
-  plot(vec, Cancer$PctMarriedHouseholds, cex=0.2, sub=paste("r = ", corr), xlab=name, main=paste("PctMarriedHouseholds vs ", name))
+  plot(vec, Cancer$PctMarriedHouseholds, cex=0.2, sub=paste("r = ", round(corr, digits=3)), xlab=name, main=paste("PctMarriedHouseholds vs ", name))
 }
 
 ## Variables positively correlated with `deathRate` 
@@ -391,7 +391,14 @@ plotInfoPctMarriedHouseholds(Cancer$PctPrivateCoverage, "PctPrivateCoverage", co
 
 ## Employment, Education and Wealth
 
-The correlations can be summarized as such: employment, education, and wealth are linked to lower cancer mortality. We can speculate about the underlying causality between some of the variables. For example, suppose the correlation with `PctBachDeg25_Over` is because educated people are aware of cancer causes and choose to avoid those causes. Education also enables people to make more money. `PctBachDeg25_Over` would therefore confound the association between `medIncome` and `deathRate`. However, suppose it's actually income that lowers cancer mortality because people can afford better treatment. In that case, its `medIncome` that confounds the association of `PctBachDeg25_Over` with `deathRate` because the wealthy are more likely to afford tuition for school. A similar statement can be made about the insurance variables.
+The strongest correlations in these data can be summarized as such: employment, education, and wealth are linked to lower cancer mortality. We can speculate about the underlying causality between some of the variables. For example, suppose the correlation with `PctBachDeg25_Over` is because educated people are aware of cancer causes and choose to avoid those causes. Education also enables people to make more money. `PctBachDeg25_Over` would therefore confound the association between `medIncome` and `deathRate`. However, suppose it's actually income that lowers cancer mortality because people can afford better treatment. In that case, its `medIncome` that confounds the association of `PctBachDeg25_Over` with `deathRate` because the wealthy are more likely to afford tuition for school.
+
+```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
+incomeEducationCorr <- cor(PctBachDeg25_Over, medIncome)
+plot(PctBachDeg25_Over, medIncome, cex=0.2, main="Income vs. Education", sub=paste("r = ", round(incomeEducationCorr, digits=3)))
+```
+
+We can see that education and income are themselves strongly correlated with r = 0.705, the strongest correlation observed in this report. In a similar manner to the previous sections, the correlation between these independant variables confounds their respective associations with the dependant variable: `deathRate`. Analogous observations were made about employment and insurance, having significant correlation with one another in addition with education and income, there are confounding effects with these variables.
 
 \pagebreak
 
