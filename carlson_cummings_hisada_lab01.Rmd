@@ -99,7 +99,7 @@ histWithNorm <- function(vec, name) {
 }
 ```
 
-The dependant variable for this analysis is `deathRate`, which is assumed to be the death rate from cancer. The histgram appears normally distributed.
+The dependent variable for this analysis is `deathRate`, which is assumed to be the death rate from cancer. The histogram appears normally distributed.
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 histWithNorm(deathRate, "deathRate")
@@ -292,11 +292,11 @@ These variables have a positive correlation, meaning counties in this set which 
 
 ## Confounding Variables
 
-The correlations can be summarized as such: employment, education, and wealth are linked to lower cancer mortality. We can speculate about the underlying causality between some of the variables. For example, suppose the correlation with `PctBachDeg25_Over` is because educated people are aware of cancer causes and choose to avoid those causes. Education also enables people to make more money. `PctBachDeg25_Over` would therefore confound the association between `medIncome` and `deathRate`. However, suppose it's actually income that lowers cancer mortality because people can afford better treatment. In that case, its `medIncome` that confounds the association of `PctBachDeg25_Over` with `deathRate` because the wealthy are more likely to afford tuition for school. A similar statement can be made about the insurance variables.
+As we analyzed the dataset, we observed some interesting correlations between some of the variables. At first glance, these correlations suggest that there are potentially causal relationships which are not in alignment with our general understanding of how cancer operates and its effects it has on us. Deeper analysis into the dataset however revealed these relationship are results of confounding associations these variables have with other variables that are more directly contributing to the correlations with  `deathRate` we are observing. 
 
 ## Racial Groups
 
-We identified certain racial groups are exhitibing higher cancer death rate than others, namely black people (`PctBlack`).
+We identified certain racial groups are exhibiting higher cancer death rate than others, namely black people (`PctBlack`).
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
@@ -312,9 +312,9 @@ for (i in 1:length(raceCors)) {
 }
 ```
 
-While the other groups are showing negative correlations with the death rate, `PctBlack` is showing a mildly strong correlation of 0.257. This at the first glance makes it seem as though black people are somehow more susceptible to cancer.
+While the other groups are showing negative correlations with the death rate, `PctBlack` is showing a positive correlation of 0.257. This makes it seem as though black people are somehow more susceptible to cancer.
 
-Looking further, we find `PctBlack` has strong positive correlations with `povertyPercent` and `PctUnemployed16_Over`, which are amongst the variables we have identified to have the strongest positive correlations with `deathRate`. 
+Looking further, we find `PctBlack` has strong positive correlations with `povertyPercent` and `PctUnemployed16_Over`, which are among the variables we have identified to have the strongest positive correlations with `deathRate`. 
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
@@ -334,11 +334,12 @@ plotInfoPctBlack(Cancer$PctBachDeg25_Over, "PctBachDeg25_Over", cor(Cancer$PctBl
 plotInfoPctBlack(Cancer$PctPrivateCoverage, "PctPrivateCoverage", cor(Cancer$PctBlack, Cancer$PctPrivateCoverage))
 ```
 
-Therefore we believe it is not their race that is increasing the cancer death rate for black people but rather the group's relatively poor econoimc standing that is contributing to the elevated `deathRate`. 
+Therefore we believe it is not their race that is increasing the cancer death rate for black people but rather the group's relatively poor economic standing that is contributing to the elevated `deathRate`. 
 
 ## Marital-Status
 
-We are also seeing relatively strong negative correlations between marital status-related variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similarly to racial groups, however, after looking at the correlations between the marital-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are considerably less likely to be in poverty. This explains the negative correlation observed between the marital status-related variables and `deathRate` rather than people's marital statuses themselves somehow magically reducing the cancer death rate. 
+We are also seeing negative correlations between marital status-related variables `PercentMarried` and `PctMarriedHouseholds` and `deathRate`. Marriage somehow decreases the chance of dying from cancer. Similarly to racial groups, however, after looking at the correlations between the marital-status variables and the same set of variables strongly correlated with `deathRate`, we see married people are considerably less likely to be in poverty. This explains the negative correlation observed between the marital status-related variables and `deathRate` rather than people's marital statuses themselves somehow magically reducing the cancer death rate. 
+
 
 ```{r,echo=FALSE, out.width='.49\\linewidth', fig.width=4, fig.height=4, fig.show='hold', fig.align='center'}
 
@@ -388,6 +389,12 @@ plotInfoPctMarriedHouseholds(Cancer$PctPrivateCoverage, "PctPrivateCoverage", co
 ```
 \pagebreak
 
+## Employment, Education and Wealth
+
+The correlations can be summarized as such: employment, education, and wealth are linked to lower cancer mortality. We can speculate about the underlying causality between some of the variables. For example, suppose the correlation with `PctBachDeg25_Over` is because educated people are aware of cancer causes and choose to avoid those causes. Education also enables people to make more money. `PctBachDeg25_Over` would therefore confound the association between `medIncome` and `deathRate`. However, suppose it's actually income that lowers cancer mortality because people can afford better treatment. In that case, its `medIncome` that confounds the association of `PctBachDeg25_Over` with `deathRate` because the wealthy are more likely to afford tuition for school. A similar statement can be made about the insurance variables.
+
+\pagebreak
+
 # Conclusion
 
 Of the 30 variables included in the Cancer Mortality dataset, we are observing strongest correlations between `deathRate` and the below 9 variables:
@@ -398,6 +405,6 @@ names(correlations)
 
 These variables fall under the categories Insurance coverage, Income Status and Education while variables that are categorized under Region, Population, Birthrate, Race and Marital Status are not showing as strong of relationships with `deathRate`.
 
-From this, we are able to conclude that for the US counties included in the datset, people's economic standing is the deciding factor for their cancer mortality rate rather than geographical factors such as region and population. Other factors such as race and marital status also appear to be directly correlated with `deathRate`. However, we found that these variables have strong correlations with Income Status and Insurance Coverage variables which lead us to suspect it is not the racial demographics or marital statuses of the residents that are diretly influencing `deathRate` but rather their economic implications that are affecting the cancer death rate in these counties.
+The following variables have a positive correlation, meaning counties in this set which have higher values are more likely to have a higher `deathRate`: `povertyPercent, PctHS25_Over, PctPublicCoverage, PctUnemployed16_Over`. The rest of the variables are associated with lower `deathRate`: `PctBachDeg25_Over, logMedIncome, medIncome, PctEmployed16_Over, PctPrivateCoverage`.
 
-These variables have a positive correlation, meaning counties in this set which have higher values are more likely to have a higher `deathRate`: `povertyPercent, PctHS25_Over, PctPublicCoverage, PctUnemployed16_Over`. The rest of the variables are associated with lower `deathRate`: `PctBachDeg25_Over, logMedIncome, medIncome, PctEmployed16_Over, PctPrivateCoverage`.
+From this, we are able to conclude that for the US counties included in the dataset, people's economic standing is the deciding factor for their cancer mortality rate rather than geographical factors such as region and population. Other factors such as race and marital status also appear to be directly correlated with `deathRate`. However, we found that these variables have strong correlations with Income Status and Insurance Coverage variables which lead us to suspect it is not the racial demographics or marital statuses of the residents that are directly influencing `deathRate` but rather their economic implications that are affecting the cancer death rate in these counties.
